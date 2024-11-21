@@ -74,6 +74,37 @@ func NewClient(cfgFileName string, processor ResponseProcessorInterface) (*Clien
 	return &result, nil
 }
 
+func NewClient2(appSettings *quickfix.Settings, processor ResponseProcessorInterface) (*Client, error) {
+
+	result := Client{
+		requestChan:    make(chan quickfix.Messagable, 500),
+		responseChan:   make(chan *quickfix.Message, 500),
+		closeCheckChan: make(chan bool),
+		processor:      processor,
+	}
+
+	//----------------------------------------
+	result.appSettings = appSettings
+
+	//
+	result.app = NewTradeApplication(&result)
+
+	fileLogFactory, err := quickfix.NewFileLogFactory(appSettings)
+	if err != nil {
+		return nil, err
+	}
+	result.fileLogFactory = fileLogFactory
+
+	//2. 构造了一个跟server的链接，其中配置是在appSettings中
+	initiator, err := quickfix.NewInitiator(result.app, quickfix.NewMemoryStoreFactory(), result.appSettings, result.fileLogFactory)
+	if err != nil {
+		return nil, err
+	}
+	result.initiator = initiator
+
+	return &result, nil
+}
+
 func (cli *Client) Start() {
 	err := cli.initiator.Start()
 	if err != nil {
