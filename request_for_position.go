@@ -4,7 +4,6 @@ import (
 	"github.com/quickfixgo/enum"
 	"github.com/quickfixgo/field"
 	fix44rfp "github.com/quickfixgo/fix44/requestforpositions"
-	"github.com/quickfixgo/quickfix"
 	"time"
 )
 
@@ -37,9 +36,4 @@ func (cli *Client) RequestForPosition() {
 
 	//---------------------------------------
 	cli.requestChan <- request
-}
-
-// ack
-func (cli *Client) RequestForPositionAck(msg *quickfix.Message) {
-
 }

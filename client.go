@@ -15,6 +15,7 @@ type Client struct {
 
 	cfgFileName string
 	app         *TradeApplication
+	processor   ResponseProcessorInterface
 
 	//过程变量
 	appSettings    *quickfix.Settings
@@ -23,13 +24,14 @@ type Client struct {
 	initiator *quickfix.Initiator
 }
 
-func NewClient(cfgFileName string) (*Client, error) {
+func NewClient(cfgFileName string, processor ResponseProcessorInterface) (*Client, error) {
 
 	result := Client{
 		requestChan:    make(chan quickfix.Messagable, 500),
 		responseChan:   make(chan *quickfix.Message, 500),
 		closeCheckChan: make(chan bool),
 		cfgFileName:    cfgFileName,
+		processor:      processor,
 	}
 
 	//----------------------------------------
@@ -110,7 +112,7 @@ func (cli *Client) RunResponse() {
 		case msg := <-cli.responseChan:
 			msgType, _ := msg.MsgType()
 			if msgType == string(enum.MsgType_REQUEST_FOR_POSITIONS_ACK) {
-				cli.RequestForPositionAck(msg)
+				cli.processor.RequestForPositionAck(msg)
 			}
 			return
 		}
