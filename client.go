@@ -14,9 +14,8 @@ type Client struct {
 	responseChan   chan *quickfix.Message
 	closeCheckChan chan bool
 
-	cfgFileName string
-	app         *TradeApplication
-	processor   ResponseProcessorInterface
+	app       *TradeApplication
+	processor ResponseProcessorInterface
 
 	//过程变量
 	appSettings    *quickfix.Settings
@@ -31,13 +30,12 @@ func NewClient(cfgFileName string, processor ResponseProcessorInterface) (*Clien
 		requestChan:    make(chan quickfix.Messagable, 500),
 		responseChan:   make(chan *quickfix.Message, 500),
 		closeCheckChan: make(chan bool),
-		cfgFileName:    cfgFileName,
 		processor:      processor,
 	}
 
 	//----------------------------------------
 
-	cfg, err := os.Open(result.cfgFileName)
+	cfg, err := os.Open(cfgFileName)
 	if err != nil {
 		return nil, err
 	}
