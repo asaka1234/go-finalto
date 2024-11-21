@@ -2,14 +2,15 @@ package finalto
 
 import (
 	"bytes"
-	"fmt"
+	"github.com/quickfixgo/enum"
 	"github.com/quickfixgo/quickfix"
 	"io"
 	"os"
 )
 
 type Client struct {
-	requestChan    chan FixApiRequest
+	requestChan    chan quickfix.Messagable
+	responseChan   chan *quickfix.Message
 	closeCheckChan chan bool
 
 	cfgFileName string
@@ -25,7 +26,8 @@ type Client struct {
 func NewClient(cfgFileName string) (*Client, error) {
 
 	result := Client{
-		requestChan:    make(chan FixApiRequest, 500),
+		requestChan:    make(chan quickfix.Messagable, 500),
+		responseChan:   make(chan *quickfix.Message, 500),
 		closeCheckChan: make(chan bool),
 		cfgFileName:    cfgFileName,
 	}
@@ -51,7 +53,7 @@ func NewClient(cfgFileName string) (*Client, error) {
 	result.appSettings = appSettings
 
 	//
-	result.app = NewTradeClient(&result)
+	result.app = NewTradeApplication(&result)
 
 	fileLogFactory, err := quickfix.NewFileLogFactory(appSettings)
 	if err != nil {
@@ -91,15 +93,13 @@ func (cli *Client) RunRequest() {
 			if isClose {
 				return
 			}
-		case <-cli.requestChan:
-			//收到请求了就发送出去
-			fmt.Printf("Dispatch pushPing Stop! ")
+		case request := <-cli.requestChan:
+			quickfix.Send(request)
 			return
 		}
 	}
 }
 
-// 接收返回并解析到不同的处理器去
 func (cli *Client) RunResponse() {
 	for {
 		select {
@@ -107,9 +107,11 @@ func (cli *Client) RunResponse() {
 			if isClose {
 				return
 			}
-		case <-cli.requestChan:
-			//收到请求了就发送出去
-			fmt.Printf("Dispatch pushPing Stop! ")
+		case msg := <-cli.responseChan:
+			msgType, _ := msg.MsgType()
+			if msgType == string(enum.MsgType_REQUEST_FOR_POSITIONS_ACK) {
+				cli.RequestForPositionAck(msg)
+			}
 			return
 		}
 	}

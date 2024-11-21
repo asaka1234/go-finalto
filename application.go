@@ -59,10 +59,6 @@ func (e TradeApplication) ToApp(msg *quickfix.Message, sessionID quickfix.Sessio
 
 // FromApp implemented as part of Application interface. This is the callback for all Application level messages from the counter party.
 func (e TradeApplication) FromApp(msg *quickfix.Message, sessionID quickfix.SessionID) (reject quickfix.MessageRejectError) {
-	fmt.Printf(fmt.Sprintf("FromApp: %s", msg.String()))
-	msgType, _ := msg.MsgType()
-	if msgType == string(enum.MsgType_REQUEST_FOR_POSITIONS_ACK) {
-
-	}
+	e.cli.responseChan <- msg
 	return
 }
