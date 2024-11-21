@@ -20,28 +20,28 @@ func NewTradeApplication(cli *Client) *TradeApplication {
 }
 
 // OnCreate implemented as part of Application interface
-func (e TradeApplication) OnCreate(sessionID quickfix.SessionID) {
+func (e *TradeApplication) OnCreate(sessionID quickfix.SessionID) {
 	fmt.Printf("----create----\n")
 }
 
 // OnLogon implemented as part of Application interface
-func (e TradeApplication) OnLogon(sessionID quickfix.SessionID) {
+func (e *TradeApplication) OnLogon(sessionID quickfix.SessionID) {
 	fmt.Printf("----logon----%s\n", sessionID.String())
 	e.isLogon = true
 }
 
 // OnLogout implemented as part of Application interface
-func (e TradeApplication) OnLogout(sessionID quickfix.SessionID) {
+func (e *TradeApplication) OnLogout(sessionID quickfix.SessionID) {
 	fmt.Printf("----logout----%s\n", sessionID.Qualifier)
 }
 
 // FromAdmin implemented as part of Application interface
-func (e TradeApplication) FromAdmin(msg *quickfix.Message, sessionID quickfix.SessionID) (reject quickfix.MessageRejectError) {
+func (e *TradeApplication) FromAdmin(msg *quickfix.Message, sessionID quickfix.SessionID) (reject quickfix.MessageRejectError) {
 	return nil
 }
 
 // ToAdmin implemented as part of Application interface
-func (e TradeApplication) ToAdmin(msg *quickfix.Message, sessionID quickfix.SessionID) {
+func (e *TradeApplication) ToAdmin(msg *quickfix.Message, sessionID quickfix.SessionID) {
 	msgType, _ := msg.MsgType()
 	uName, _ := e.cli.appSettings.GlobalSettings().Setting("Username")
 	uPwd, _ := e.cli.appSettings.GlobalSettings().Setting("Password")
@@ -52,8 +52,8 @@ func (e TradeApplication) ToAdmin(msg *quickfix.Message, sessionID quickfix.Sess
 }
 
 // ToApp implemented as part of Application interface
-func (e TradeApplication) ToApp(msg *quickfix.Message, sessionID quickfix.SessionID) (err error) {
-	fmt.Printf(fmt.Sprintf("Sending: %s", msg.String()))
+func (e *TradeApplication) ToApp(msg *quickfix.Message, sessionID quickfix.SessionID) (err error) {
+	fmt.Printf("Sending: %s\n", msg.String())
 	return
 }
 

@@ -6,6 +6,7 @@ import (
 	"github.com/quickfixgo/quickfix"
 	"io"
 	"os"
+	"time"
 )
 
 type Client struct {
@@ -80,6 +81,13 @@ func (cli *Client) Start() {
 	}
 	go cli.RunRequest()
 	go cli.RunResponse()
+	//确保一定是logon了才能接收request
+	for {
+		if cli.app.isLogon {
+			break
+		}
+		time.Sleep(1 * time.Second)
+	}
 }
 
 func (cli *Client) Stop() {
