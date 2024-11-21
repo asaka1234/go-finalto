@@ -7,14 +7,14 @@ import (
 	"time"
 )
 
-func (cli *Client) RequestForPosition() {
+func (cli *Client) RequestForPosition(requestId, account string) {
 	cusZone := time.FixedZone("UTC", 0*60*60)
 	ctime := time.Now().In(cusZone)
 	cdate := ctime.Format("20060102-15:04:05")
 
-	request := fix44rfp.New(field.NewPosReqID("position4"), //710
+	request := fix44rfp.New(field.NewPosReqID(requestId), //710
 		field.NewPosReqType(enum.PosReqType_POSITIONS), //724
-		field.NewAccount("25249"),                      //1
+		field.NewAccount(account),                      //1
 		field.NewAccountType(enum.AccountType_ACCOUNT_IS_CARRIED_ON_CUSTOMER_SIDE_OF_THE_BOOKS), //581
 		field.NewClearingBusinessDate(cdate),                                                    //715  20060826-15:31:22
 		field.NewTransactTimeNoMillis(ctime),                                                    //60   20060826-15:31:22
